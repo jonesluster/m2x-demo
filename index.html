@@ -1,0 +1,415 @@
+﻿<!--
+Copyright (c) 2014, Kevin W. Jones. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+OF SUCH DAMAGE.
+-->
+<!DOCTYPE html> 
+<head>
+	<meta charset="utf-8" />  
+	<title>M2X Demo</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Kevin Wray Jones">
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
+	<link rel="icon" href="img/icons/favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="img/icons/favicon.ico" />
+	<script src="https://code.jquery.com/jquery-2.1.1.js"></script>	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+	<script src="js/gmaps.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.simpleWeather/3.0.2/jquery.simpleWeather.min.js"></script>
+ </head>
+<body>
+<!-- Piwik -->
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + "://attme.sealabs.org/analytics/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 3]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
+    g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src="http://attme.sealabs.org/analytics/piwik.php?idsite=3" style="border:0;" alt="" /></p></noscript>
+<!-- End Piwik Code -->
+
+<div class="container">
+	<div class="panel panel-default" style="margin-top:10px;">
+  		<div class="panel-body" style="margin-top:-5px;margin-bottom:-15px;">
+  			<img src="https://m2x.att.com/images/logo-att-globe.svg"/ style="align-left;"><h4 class="text-center" style="margin-top:-30px;">M2X Cloud</h4><p class="text-center" style="margin-top:-12px;"><em>An MSS M2M Demo</em></p>
+		</div>
+	</div>
+	<div class="panel panel-default" style="margin-top:-10px;">
+  		<div class="panel-body" style="margin-top:-10px;margin-bottom:-10px;margin-left:-10px;margin-right:-10px;">
+			<div class="text-center"><button id="locationButton" type="button" class="btn btn-info btn-lg btn-block" onclick="toggleLocation()" data-toggle="collapse" data-target="#coordinates" style="font-size:2em;">Name &amp; Locale<i style="margin-top:5px;" class="pull-right fa fa-arrow-circle-down fa-lg"></i></button></div>
+			<div style="padding-top:10px;" id="coordinates" class="collapse">
+				<table width="100%">
+					<tr>
+						<td class="text-left"><label>Name Tag:</label></td>
+						<td class="text-left" colspan="2"><input type="text" id="nametag" style="width:150px;" /><span id="nametagHelp" style="margin-top:10px;">&nbsp;&nbsp;<i class="fa fa-info-circle fa-2x"></i></span></td>
+					</tr>
+					<tr><td colspan="3"><hr></td></tr>
+					<tr>
+						<td class="text-left"><label>Lat:</label></td>
+						<td><input type="text" id="latitude" style="width:150px;" readonly/></td>
+						<td rowspan="2" class="text-center" style="align-vertical">&nbsp;&nbsp;<button class="btn btn-success" id="locationButton" onclick="getLocation()"><i class="fa fa-refresh fa-2x"></i></button></td>
+					</tr>
+					<tr><td colspan="3">&nbsp;</td></tr>
+					<tr>
+						<td><label>Lng:</label></td>
+						<td><input type="text" id="longitude" style="width:150px;" readonly/></td>
+					</tr>
+					<tr><td colspan="3">&nbsp;</td></tr>
+					<tr>
+						<td><label>Alt (m):</label></td>
+						<td><input type="text" id="altitude" style="width:150px;" readonly/></td>
+					</tr>
+					<tr><td colspan="3">&nbsp;</td></tr>
+					<tr>
+						<td><label>Accuracy:</label></td>
+						<td><input type="text" id="altitudeaccuracy" style="width:150px;" readonly/></td>
+					</tr>
+					<tr>
+						<td colspan="3" height="25"><hr></td>
+					</tr>
+					<tr>
+						<td><label>Postal:</label></td>
+						<td><input type="number" id="postal_code" style="width:150px;"/></td>
+						<td class="text-center"><button class="btn btn-success" id="zipButton" onclick="geoCode()"><i class="fa fa-refresh fa-2x"></i></button></td>
+					</tr>
+					<tr><td colspan="3">&nbsp;</td></tr>
+					<tr style="margin-top:5px;">
+						<td><label>Locale:</label></td>
+						<td colspan="2" id="region"></td>
+					</tr>
+				</table>
+			</div>
+  		</div>
+	</div>
+	<div class="panel panel-default" style="margin-top:-10px;">
+  		<div class="panel-body" style="margin-top:-10px;margin-bottom:-10px;margin-left:-10px;margin-right:-10px;">
+			<div class="text-center"><button type="button" id="deviceButton" class="btn btn-warning btn-lg btn-block" onclick="toggleDevice()" data-toggle="collapse" data-target="#deviceinfo" style="font-size:2em;">Sensors<i style="margin-top:5px;" class="pull-right fa fa-arrow-circle-down fa-lg"></i></button></div>
+			<div style="padding-top:10px;" id="deviceinfo" class="collapse">
+				<div class="row" style="padding-left:15px;padding-right:15px;"><h3>Hardware & Features</h3></div>
+				<div class="row">
+					<div class="col-xs-4"><label>OS:</label></div>
+					<div class="col-xs-8" id="platform"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Browser:</label></div>
+					<div class="col-xs-8" id="browserName"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Version:</label></div>
+					<div class="col-xs-8" id="fullVersion"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Battery:</label></div>
+					<div class="col-xs-8" id="battery"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>CPUs:</label></div>
+					<div class="col-xs-8" id="CPUCount"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Width:</label></div>
+					<div class="col-xs-8" id="width"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Height:</label></div>
+					<div class="col-xs-8" id="height"></div>
+				</div>
+				<div class="row" style="padding-left:15px;padding-right:15px;"><h3>Environment</h3></div>
+				<div class="row">
+					<div class="col-xs-4"><label>Temp:</label></div>
+					<div class="col-xs-8" id="tempF"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Low:</label></div>
+					<div class="col-xs-8" id="lowTempF"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>High:</label></div>
+					<div class="col-xs-8" id="highTempF"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Pressure:</label></div>
+					<div class="col-xs-8" id="pressure"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>State:</label></div>
+					<div class="col-xs-8" id="pressureState"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Wind Speed:</label></div>
+					<div class="col-xs-8" id="windSpeed"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Direction:</label></div>
+					<div class="col-xs-8" id="windDirection"></div>
+				</div>
+				<div class="row">
+					<div class="col-xs-4"><label>Code:</label></div>
+					<div class="col-xs-8" id="weatherCode"></div>
+				</div>	
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default" style="margin-top:-10px;">
+  		<div class="panel-body" style="margin-top:-10px;margin-bottom:-10px;margin-left:-10px;margin-right:-10px;">
+			<div class="text-center">
+				<button class="btn btn-info btn-lg" id="mapButton" onclick="openMapModal()"><i style="margin-left:-3px;margin-right:-3px;" class="fa fa-globe fa-2x"></i></button>
+				<span class="spanner"></span> <!-- add space between buttons for wider displays -->
+				<button class="btn btn-danger btn-lg" id="sendButton" onclick="openSendModal()"><i style="margin-left:-3px;margin-right:-3px;" class="fa fa-send-o fa-2x"></i></button>
+				<span class="spanner"></span> <!-- add space between buttons for wider displays -->
+				<button class="btn btn-success btn-lg" id="M2XButton" onclick="openM2XModal()"><font color="white"><i style="margin-left:-5px;margin-right:-5px;" class="fa fa-cloud fa-2x"></i></font></button>
+				<span class="spanner"></span> <!-- add space between buttons for wider displays -->
+				<button class="btn btn-primary btn-lg" id="helpButton" onclick="javascript:openHelpModal();"><i style="margin-left:-3px;margin-right:-3px;" class="fa fa-question-circle fa-2x"></i></button>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default" style="margin-top:-10px;">
+  		<div class="panel-body" style="margin-top:-10px;margin-bottom:-10px;">
+			<div class="text-center"><label>STATUS:&nbsp;</label><span id="connectionStatus"></span></div>
+			<div id="reconnect" class="text-center" style="display:none;">
+				<br />
+				<span><button class="btn btn-danger text-center" onclick="reconnect()">Re-Connect</button></span>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default" style="margin-top:-10px;">
+  		<div class="panel-body" style="margin-top:-10px;margin-bottom:-10px;margin-left:-10px;margin-right:-10px;">
+			<div class="text-center"><button type="button" id="howItWorksButton" class="btn btn-success btn-lg btn-block" onclick="toggleHowItWorks()" data-toggle="collapse" data-target="#howitworks" style="font-size:2em;">How It Works!<i style="margin-top:5px;" class="pull-right fa fa-arrow-circle-down fa-lg"></i></button></div>
+				<div style="padding-top:10px;" id="howitworks" class="collapse">
+					<div class="row" style="padding-left:15px;padding-right:15px;">
+						<p>Your phone is acting as the Internet "Thing," which can push device "sensor" information into the AT&amp;T M2X cloud.</p>
+						<p>View your device information: <a href="https://m2x.att.com/feed/46e330aa2218faf9cdc1e5186f94918f" target="_blank">M2X Feeds</a></p>
+						<p>Here is an illustration of our demo environment (phone->M2X App Engine->M2X Data Services).</p>
+						<img src="img/overview01.png" width="300px" style="float:left;padding-right:10px;"/>
+						<p>This demo is a web app is written using HTML5, CSS3, and JavaScript. When you refresh the location information, the device GPS is used to obtain updated coordinates.  Alternately, you can enter a zip code and the app will query Google Maps for the lat/long matching that postal code.</p>
+						<p>As the location is selected / modified, the app also queries the Yahoo Weather via APIs to get the latest weather information for the location. That gives us "device-centric" data to send into the AT&amp;T M2X cloud. You can find that under the "Device" pull-down.</p>
+						<ol>
+							<li>When you press the "Send to M2X" button, the app formats the location, device and weather information into a JSON object and sends via web service to the AT&T M2X App Engine.</li>
+							<li>Upon authentication by M2X, it is parsed &amp; validated, applied via business logic, and ultimately pushed into the M2X Data Services cloud for long-term storage.</li> 
+							<li>Once stored, you can view your data in time-based format, aggregate for business analytics, share with other applications, etc.</li>
+						</ol>
+						<p>&copy; 2014 by Kevin W. Jones. Kevin is an architect with AT&amp;T Mobility Solutions Services. If you'd like to learn more, ask your AT&amp;T mobility professional to contact Kevin and the MSS team.</p>
+						<p><font color="Orange"><i class="fa fa-star fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;For best results, combine this demo with the M2X Talks! demo, found <a href="../stt/index.html" target="_blank">here.</a></p>
+
+					</div>
+				</div>
+			</div>		
+		</div>
+	</div>
+	<input type="hidden" id="payload" />
+</div>
+<footer class="text-center">&copy; 2014, AT&amp;T. All rights reserved.<br>MSS - We make mobility work!</footer>
+<div class="modal"  data-backdrop="static" id="splashModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle-o fa-2x"></i></button> -->
+				<img src="https://m2x.att.com/images/logo-att-globe.svg"/ style="align-left;"><h2 class="text-center" style="margin-top:-30px;">Welcome!</h2>
+			</div>
+			<div class="modal-body">
+				<div id="splashBody" style="font-size:large;color:Black;">
+					<p class="text-left">This MSS-created demo lets you use your smartphone to interact with the AT&amp;T M2X Cloud.</p>
+					<div class="text-center" style="padding-bottom:10px;"><img src="img/m2x02.png" style="width:75%;" /></div>
+					<p class="text-center">Press <font color="ForestGreen"><b>Continue</b></font> and send us some data!</p>
+				</div>
+				<div class="text-center" style="padding-top:10px;">AT&amp;T MSS - <em>We make mobility work!</em></div>
+			</div><!-- modal body -->
+			<div class="modal-footer" style="text-align:center;">
+				<span class="text-center">
+					<button class="btn btn-success text-center" onclick="closeSplashModal()">Continue</button>
+				</span>
+			</div>
+		</div><!-- modal-content -->
+	</div><!-- modal-dialog -->
+</div><!-- splashModal -->
+<div class="modal"  data-backdrop="static" id="mapModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body text-left">
+				<div id="mapBody" style="font-size:large;color:Black;">
+					<div id="map_canvas" style="height:300px;margin-top:5px;margin-bottom:5px;"></div>
+				</div>
+			</div><!-- modal body -->
+			<div class="modal-footer" style="text-align:center;">
+				<span class="text-center">
+					<button class="btn btn-primary text-center" onclick="closeMapModal()">Close</button>
+				</span>
+			</div>
+		</div><!-- modal-content -->
+	</div><!-- modal-dialog -->
+</div><!-- mapModal -->
+<div class="modal"  data-backdrop="static" id="M2XModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle-o fa-2x"></i></button> -->
+				<h2 class="modal-title text-center">AT&amp;T M2X Cloud</h2>
+			</div>
+			<div class="modal-body text-left">
+				<div id="M2XBody" style="font-size:large;color:Black;">
+					<p>This will open a new browser window into the AT&amp;T M2X cloud, where you can view the data streams (feeds) from your phone.</p>
+					<p>Alternately, you send yourself the link via email, in order to view on a larger format tablet or laptop.</p>
+				</div>
+			</div><!-- modal body -->
+			<div class="modal-footer" style="text-align:center;">
+				<span class="text-center">
+					<button class="btn btn-success text-center" onclick="goToM2X()">M2X</button>
+					<a class="btn btn-primary text-center" href="mailto:you@youremailaddress?body=Click https://m2x.att.com/feed/46e330aa2218faf9cdc1e5186f94918f to see your data from the M2X Cloud&subject=M2X Link">Email Link</a>
+					<button class="btn btn-danger text-center" onclick="closeM2XModal()">Close</button>
+				</span>
+			</div>
+		</div><!-- modal-content -->
+	</div><!-- modal-dialog -->
+</div><!-- M2XModal -->
+<div class="modal"  data-backdrop="static" id="sendModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle-o fa-2x"></i></button> -->
+				<h2 class="modal-title text-center">Send M2M Payload?</h2>
+			</div>
+			<div class="modal-body text-left">
+				<div id="sendBody" style="font-size:large;color:Black;">
+					<p>Are you ready to send your device &amp; location information to M2X?</p>
+				</div>
+			</div><!-- modal body -->
+			<div class="modal-footer" style="text-align:center;">
+				<span class="text-center">
+					<button class="btn btn-success text-center" onclick="sendPayload()">Send to M2X</button>&nbsp;&nbsp;&nbsp;
+					<button class="btn btn-danger text-center" onclick="closeSendModal()">Cancel</button>
+				</span>
+			</div>
+		</div><!-- modal-content -->
+	</div><!-- modal-dialog -->
+</div><!-- sendModal -->
+<div class="modal"  data-backdrop="static" id="responseModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle-o fa-2x"></i></button> -->
+				<h2 class="modal-title text-center">Response</h2>
+			</div>
+			<div class="modal-body text-left">
+				<div id="responseBody" style="font-size:large;color:Black;"></div>
+			</div><!-- modal body -->
+			<div class="modal-footer" style="text-align:center;">
+				<span class="text-center">
+					<button class="btn btn-success text-center" onclick="goToM2X()">M2X</button>
+					<a class="btn btn-primary text-center" href="mailto:you@youremailaddress?body=Click https://m2x.att.com/feed/46e330aa2218faf9cdc1e5186f94918f to see your data from the M2X Cloud&subject=M2X Link">Email Link</a>
+					<button class="btn btn-danger text-center" onclick="closeResponseModal()">Close</button>
+				</span>
+			</div>
+		</div><!-- modal-content -->
+	</div><!-- modal-dialog -->
+</div><!-- responseModal -->
+<div class="modal"  data-backdrop="static" id="statusModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle-o fa-2x"></i></button> -->
+				<h2 class="modal-title text-center">Status</h2>
+			</div>
+			<div class="modal-body text-left">
+				<div id="statusBody" style="font-size:large;color:Black;"></div>
+			</div><!-- modal body -->
+			<div class="modal-footer" style="text-align:center;">
+				<span class="text-center">
+					<button class="btn btn-danger text-center" onclick="closeStatusModal()">Close</button>
+				</span>
+			</div>
+		</div><!-- modal-content -->
+	</div><!-- modal-dialog -->
+</div><!-- statusModal -->
+
+<div class="modal"  data-backdrop="static" id="helpModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle-o fa-2x"></i></button> -->
+				<img src="https://m2x.att.com/images/logo-att-globe.svg"/ style="align-left;"><h2 class="text-center" style="margin-top:-30px;">Help</h2>
+			</div>
+			<div class="modal-body text-left">
+				<div id="helpBody" style="font-size:large;color:Black;">
+					<p>View or modify your location (which updates device weather info, then send to AT&amp;T M2X.</p>
+					<p><font color="DodgerBlue"><i class="fa fa-arrow-circle-down fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;View / Change Location.</p>
+					<p><font color="SandyBrown"><i class="fa fa-arrow-circle-down fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;View Sensor Info.</p>
+					<p><font color="ForestGreen"><i class="fa fa-arrow-circle-down fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;Learn More!.</p>
+					<p><font color="DodgerBlue"><i class="fa fa-globe fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;Map phone location.</p>
+					<p><font color="FireBrick"><i class="fa fa-send-o fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;Send data to AT&amp;T M2X.</p>
+					<p><font color="ForestGreen"><i class="fa fa-cloud fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;Go to AT&amp;T M2X.</p>
+					<p><font color="SteelBlue"><i class="fa fa-question-circle fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;This Help screen.</p>
+					<br>
+				</div>
+				<br />
+				<div style="font-size:large;color:Black;">
+					<p><font color="Orange"><i class="fa fa-star fa-lg"></i></font>&nbsp;&nbsp;-&nbsp;For best results, combine this demo with the M2X Talks! demo, found <a href="../stt/index.html" target="_blank">here.</a></p>
+				</div>
+
+				<div class="text-center">&copy; 2014 by Kevin W. Jones.</div>
+			</div><!-- modal body -->
+			<div class="modal-footer" style="text-align:center;">
+				<span class="text-center">
+					<button class="btn btn-primary text-center" onclick="closeHelpModal()">Close</button>
+				</span>
+			</div>
+		</div><!-- modal-content -->
+	</div><!-- modal-dialog -->
+</div><!-- helpModal -->
+<div class="modal"  data-backdrop="static" id="infoModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times-circle-o fa-2x"></i></button> -->
+				<h2 class="modal-title text-center">M2X Cloud</h2>
+				<h3 class="modal-title text-center">How it Works!</h3>
+
+			</div>
+			<div class="modal-body text-left">
+				<div id="infoBody" style="font-size:large;color:Black;">
+					<!-- This datasource can be changed as needed.  Just add the read-only (view) URL as provided by M2X for the data source -->
+					<p>Your phone is the Internet "Thing" which can push device "sensor" information into the AT&amp;T M2X cloud.</p>
+					<p>View your device information: <a href="https://m2x.att.com/datasources/7f6551ec16a1eb1f907c58c5cf08cf1d">M2X Feeds</a>
+				</div>
+			</div><!-- modal body -->
+			<div class="modal-footer" style="text-align:center;">
+				<span class="text-center">
+					<button class="btn btn-primary text-center" onclick="closeInfoModal()">Close</button>
+				</span>
+			</div>
+		</div><!-- modal-content -->
+	</div><!-- modal-dialog -->
+</div><!-- infoModal -->
+<script src="js/main.js"></script>
+<body>
+</html>
